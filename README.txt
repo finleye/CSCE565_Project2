@@ -1,7 +1,7 @@
 Corey Finley
 31 October 2013
 
-To compile teapot.c, run the makefile
+To compile extrude.c, run the makefile
 
 make
 
