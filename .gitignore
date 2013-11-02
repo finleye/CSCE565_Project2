@@ -14,6 +14,7 @@
 /log/*.log
 /tmp
 
-*.dSYM
-*.xcodeproj
-565_Project2.xcodeproj/
+/*.dSYM
+/*.xcodeproj
+/565_Project2.xcodeproj/
+/*.pbxproj
