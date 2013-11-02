@@ -3,13 +3,19 @@
 # Addapted from makefile supplied on dropbox.                                   
 
 #Specifies the files we will be compiling
-COMPILING = extruding.c
+COMPILING = extrude.c
 
 #Specifies the executable's name
 EXECUTABLE = Extrude
 
 #Specifies the compilier we will be using
-CC = g++
+
+#Linux
+#CC = g++
+
+#Mac
+CC = gcc
+
 
 #Specifies the compiler flags to be used
 # -g3 adds debugging symbols
@@ -17,7 +23,12 @@ CC = g++
 CFLAGS = -g3 -Wall -Wno-non-template-friend -fpermissive
 
 #Specifies the locations and libraries needed to compile the executable
-LIBRARIES = -L"/usr/X11/lib" -lglut -lGL -lGLU -lm
+# Linux
+# LIBRARIES = -L "/usr/X11/lib" 
+# LIBRARIES += -lglut -lGL -lGLU -lm
+
+# Mac
+LIBRARIES += -framework OpenGL -framework GLUT
 
 all:
 	$(CC) $(CFLAGS) $(LIBRARIES) $(COMPILING) -o $(EXECUTABLE)

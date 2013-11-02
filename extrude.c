@@ -5,8 +5,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <GL/glut.h> 
-#include <GL/gl.h>
+#include <stdbool.h> 
+
+// Mac Header Files
+#include <GLUT/glut.h>
+#include <OpenGL/gl.h>
+
+// Linux Header Files
+// #include <GL/glut.h> 
+// #include <GL/gl.h>
 
 int  l_click = GLUT_UP; // initial value for left click
 int  r_click = GLUT_UP; // initial value for right click

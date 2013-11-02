@@ -1,0 +1,148 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		8F5DEEBC18258D5C008035F5 /* .DS_Store */ = {isa = PBXFileReference; lastKnownFileType = file; path = .DS_Store; sourceTree = "<group>"; };
+		8F5DEEBD18258D5C008035F5 /* .git */ = {isa = PBXFileReference; lastKnownFileType = folder; path = .git; sourceTree = "<group>"; };
+		8F5DEEBE18258D5C008035F5 /* extrude.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = extrude.c; sourceTree = "<group>"; };
+		8F5DEEBF18258D5C008035F5 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		8F5DEEC018258D5C008035F5 /* README.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		8F5DEEC418258DA2008035F5 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = ../../../../../System/Library/Frameworks/OpenGL.framework; sourceTree = "<group>"; };
+		8F5DEEC518258DF6008035F5 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../../../System/Library/Frameworks/GLUT.framework; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		8F5DEEB618258D5C008035F5 = {
+			isa = PBXGroup;
+			children = (
+				8F5DEEC518258DF6008035F5 /* GLUT.framework */,
+				8F5DEEC418258DA2008035F5 /* OpenGL.framework */,
+				8F5DEEBC18258D5C008035F5 /* .DS_Store */,
+				8F5DEEBD18258D5C008035F5 /* .git */,
+				8F5DEEBE18258D5C008035F5 /* extrude.c */,
+				8F5DEEBF18258D5C008035F5 /* Makefile */,
+				8F5DEEC018258D5C008035F5 /* README.txt */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		8F5DEEBB18258D5C008035F5 /* 565_Project2 */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 8F5DEEC118258D5C008035F5 /* Build configuration list for PBXLegacyTarget "565_Project2" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = /Users/coreyfinley/Documents/School/565_Project2;
+			dependencies = (
+			);
+			name = 565_Project2;
+			passBuildSettingsInEnvironment = 1;
+			productName = 565_Project2;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		8F5DEEB718258D5C008035F5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+			};
+			buildConfigurationList = 8F5DEEBA18258D5C008035F5 /* Build configuration list for PBXProject "565_Project2" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 8F5DEEB618258D5C008035F5;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8F5DEEBB18258D5C008035F5 /* 565_Project2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		8F5DEEB818258D5C008035F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		8F5DEEB918258D5C008035F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+		8F5DEEC218258D5C008035F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = 565_Project2;
+			};
+			name = Debug;
+		};
+		8F5DEEC318258D5C008035F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = 565_Project2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8F5DEEBA18258D5C008035F5 /* Build configuration list for PBXProject "565_Project2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F5DEEB818258D5C008035F5 /* Debug */,
+				8F5DEEB918258D5C008035F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8F5DEEC118258D5C008035F5 /* Build configuration list for PBXLegacyTarget "565_Project2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F5DEEC218258D5C008035F5 /* Debug */,
+				8F5DEEC318258D5C008035F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8F5DEEB718258D5C008035F5 /* Project object */;
+}
