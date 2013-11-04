@@ -17,7 +17,9 @@
 
 int  l_click = GLUT_UP; // initial value for left click
 int  r_click = GLUT_UP; // initial value for right click
+int  draw_type = GL_POLYGON; // for toggling between solid object, and wireframe
 
+/* vertex struct */
 typedef struct {
   GLfloat x;
   GLfloat y;
@@ -28,10 +30,12 @@ vertex front_face[20];
 int num_verticies = 0;
 bool extruded = false;
 
-float front_face_z = -2.0;
+float front_face_z = -2.0; // default for front face drawing
 
-int start_x, start_y; // variables for start x and y for teapots 1 and 2 respectivly
-double theta_x, theta_y, mouse_delta_x, mouse_delta_y; // rotation variables for teapot 1
+float extrusion_depth = 0.5; // default for extrusion depth
+
+int start_x, start_y; // variables for start x and y when clicking the mouse for rotation
+double theta_x, theta_y, mouse_delta_x, mouse_delta_y; // rotation variables
 GLfloat matrix[16]; // matrix state for rotation
 
 double HEIGHT = 500; // window size
@@ -74,15 +78,20 @@ void init()
   glMatrixMode(GL_MODELVIEW);
   glEnable(GL_DEPTH_TEST); // enable hidden surface removal
 
+  /* set up matrix for rotation after extrusion */
   glLoadMatrixf(matrix);
   glLoadIdentity();
   glTranslatef(0.0,0.0,-3.0);
   glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
 
+  glDisable(GL_CULL_FACE);
+
   setLighting(); // call method to set the lighting effects
   num_verticies = 0;
+  printf("Click to draw Polygon!\n");
 }
 
+/* create a point from mouse click */
 vertex createPoint(int x, int y){
   GLint viewport[4];
   GLdouble model_view[16];
@@ -102,6 +111,7 @@ vertex createPoint(int x, int y){
   glReadPixels( x, (int)window_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &window_z );
   gluUnProject( window_x, window_y, window_z, model_view, projection, viewport, &position_x, &position_y, &position_z);
 
+  // set point values
   point.x = position_x;
   point.y = position_y;
   point.z = front_face_z;
@@ -109,8 +119,8 @@ vertex createPoint(int x, int y){
   return point;
 }
 
+/* Material Attributes */
 void setMaterial(){
-  /* Material Attributes */
   GLfloat amb[]={0.0215, 0.1745, 0.0215, 1.0};
   GLfloat diff[]={0.07568, 0.61424, 0.07568, 1.0};
   GLfloat spec[]={0.633, 0.727811, 0.633, 1.0};
@@ -122,6 +132,9 @@ void setMaterial(){
   glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shine);
 }
 
+/* Find the center of the object by taking the average distance
+ * of the verticies from the origin
+ */
 vertex findCenter(vertex* input_shape){
   vertex point;
 
@@ -139,28 +152,30 @@ vertex findCenter(vertex* input_shape){
   return point;
 }
 
+/* Move the object to the origin by finding the center of 
+ * the object and translating each point that amount.
+ */
 void setCenter(vertex* input_shape){
   vertex center = findCenter(input_shape);
-    printf("%15s\t%10s\t%10s\n", "Info", "X-Value", "Y-Value");
-    printf("%15s\t%10s\t%10s\n", "-------------", "----------", "----------");
-    printf("%15s\t%10f\t%10f\n", "Found Center", (float)center.x, (float)center.y);
 
   int i;
   for(i=0; i< num_verticies; i++){
-    printf("%15s\t%10f\t%10f\n", "Pre-Center", input_shape[i].x, input_shape[i].y);
     input_shape[i].x = input_shape[i].x-center.x;
     input_shape[i].y = input_shape[i].y-center.y;
-    printf("%15s\t%10f\t%10f\n", "Post-Center", input_shape[i].x, input_shape[i].y);
   }
 }
 
+/* Draw a front or back face, stored in the array. This face will
+ * have a z offset value passed as a parameter. The front face while
+ * drawing is set by deault
+ */
 void createPolygon(vertex* input_shape, float z_value){
   setMaterial();
 
   int i;
   vertex temp;
 
-  glBegin(GL_POLYGON);
+  glBegin(draw_type);
   for(i=0; i< num_verticies; i++){
     temp = input_shape[i];
     glVertex3f((float)temp.x, (float)temp.y, z_value);
@@ -168,6 +183,7 @@ void createPolygon(vertex* input_shape, float z_value){
   glEnd();
 }
 
+/* Draw the fron face, side wals, and back face from the passed in shape */
 void createObject(vertex* input_shape){
   setMaterial();
 
@@ -182,7 +198,7 @@ void createObject(vertex* input_shape){
   theta_y = 0;
 
   /* Draw Front Face*/
-  createPolygon(front_face, 0.5);
+  createPolygon(front_face, extrusion_depth);
 
   /* Draw side walls */
   int i, j;
@@ -192,16 +208,16 @@ void createObject(vertex* input_shape){
     } else {
       j = i+1;
     }
-    glBegin(GL_POLYGON); 
-    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, 0.5);
-    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, 0.5);
-    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, -0.5);
-    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, -0.5);
+    glBegin(draw_type); 
+    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, extrusion_depth);
+    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, extrusion_depth);
+    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, -extrusion_depth);
+    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, -extrusion_depth);
     glEnd();
   }
 
   /* draw back face */
-  createPolygon(front_face, -0.5);
+  createPolygon(front_face, -extrusion_depth);
 }
 
 /* display frame */
@@ -209,7 +225,7 @@ void display(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // clear the color buffer and the depth buffer
   if(num_verticies >= 3){
     if(extruded == false){
-      createPolygon(front_face, -2.0);
+      createPolygon(front_face, -2.5);
     } else {
       createObject(front_face);
     }
@@ -219,18 +235,42 @@ void display(){
 
 /* interprate keyboard functions */
 void keyboard(unsigned char key, int x, int y){
-  /* Load the matrix for the teapot1 and teapot2 for l key 
-   * press and r key press respectivly. Load the identity
-   * matrix to clear it out, then reiterate the translate.
-   * This resets the teapot, without any rotation.
+  /* Press r to reset the object to starting rotation point
+   * Press w to toggle between solid and wireframe view
+   * Press s to start over from polygon draw
    */
-  if('l' == key || 'L' == key){
 
-  }
   if('r' == key || 'R' == key){
-    printf("Reset!\n");
+    printf("Reset to starting rotation\n");
+    glLoadMatrixf(matrix);
+    glLoadIdentity();
+    glTranslatef(0.0,0.0,-3.0);
+    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);   
+
+    glutPostRedisplay(); // redisplay 
+  }
+  if('w' == key || 'W' == key){
+    if(draw_type == GL_POLYGON){
+      printf("View Mode: Wireframe\n");
+      draw_type = GL_LINE_LOOP;
+    } else{
+      printf("View Mode: Solid Object\n");
+      draw_type = GL_POLYGON;
+    }
+
+    glutPostRedisplay(); // redisplay 
+  }
+  if('s' == key || 'S' == key){
+    printf("Click to draw Polygon!\n");
     extruded = false;
     num_verticies = 0;
+
+    /* reset rotation matrix */
+    glLoadMatrixf(matrix);
+    glLoadIdentity();
+    glTranslatef(0.0,0.0,-3.0);
+    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
+
     glutPostRedisplay(); // redisplay
   }
 }
@@ -262,6 +302,7 @@ void mouseClick(int button, int state, int x, int y){
   }
   if(GLUT_RIGHT_BUTTON == button && state == GLUT_DOWN){
     if(extruded == false){
+      printf("Extruded: Click and drag to rotate.\n");
       theta_x = 0.0;
       theta_y = 0.0;
       extruded = true;
@@ -276,8 +317,6 @@ void mouseClick(int button, int state, int x, int y){
 
 /* interprate mouse motion */
 void mouseMotion(int x, int y){
-  /* For both right and left click, first measure change in x, and
-   */
   if(l_click == GLUT_DOWN){
     mouse_delta_x = (x-start_x)/2.f; // Change in x
     mouse_delta_y = (y-start_y)/2.f; // Change in y
@@ -286,8 +325,6 @@ void mouseMotion(int x, int y){
     glutPostRedisplay(); // redisplay
   }
 }
-
-
 
 /* Main */
 int main(int argc, char* argv[])
