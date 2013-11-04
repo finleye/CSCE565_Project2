@@ -132,6 +132,18 @@ void setMaterial(){
   glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shine);
 }
 
+/* Draw poitns for creating the polygon */
+void drawPoints(vertex* input_shape){
+  int i;
+  vertex temp;
+  glBegin(GL_LINE_LOOP);
+  for(i=0; i< num_verticies; i++){
+    temp = input_shape[i];
+    glVertex3f((float)temp.x, (float)temp.y, -2.0f);
+  }
+  glEnd();
+}
+
 /* Find the center of the object by taking the average distance
  * of the verticies from the origin
  */
@@ -169,17 +181,20 @@ void setCenter(vertex* input_shape){
  * have a z offset value passed as a parameter. The front face while
  * drawing is set by deault
  */
-void createPolygon(vertex* input_shape, float z_value){
+void createFace(vertex* input_shape, float z_value){
   setMaterial();
 
   int i;
   vertex temp;
+  vertex center = findCenter(input_shape);
 
   glBegin(draw_type);
+  glVertex3f((float)center.x, (float)center.y, z_value); // use the found center as the center of the fan
   for(i=0; i< num_verticies; i++){
     temp = input_shape[i];
     glVertex3f((float)temp.x, (float)temp.y, z_value);
   }
+  glVertex3f(input_shape[0].x, input_shape[0].y, z_value); // to complete the fan, use the starting click vertex again
   glEnd();
 }
 
@@ -198,7 +213,9 @@ void createObject(vertex* input_shape){
   theta_y = 0;
 
   /* Draw Front Face*/
-  createPolygon(front_face, extrusion_depth);
+  createFace(front_face, extrusion_depth);
+  /* draw back face */
+  createFace(front_face, -extrusion_depth);
 
   /* Draw side walls */
   int i, j;
@@ -215,19 +232,16 @@ void createObject(vertex* input_shape){
     glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, -extrusion_depth);
     glEnd();
   }
-
-  /* draw back face */
-  createPolygon(front_face, -extrusion_depth);
 }
 
 /* display frame */
 void display(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // clear the color buffer and the depth buffer
   if(num_verticies >= 3){
-    if(extruded == false){
-      createPolygon(front_face, -2.5);
-    } else {
+    if(extruded == true){
       createObject(front_face);
+    } else {
+      drawPoints(front_face);
     }
   }
   glutSwapBuffers(); // swap buffers in the double buffer
@@ -282,6 +296,7 @@ void mouseClick(int button, int state, int x, int y){
    */
   if(GLUT_LEFT_BUTTON == button && state == GLUT_DOWN){
     if(extruded == false){
+      /* if the number of verticies has not been reached, add it. */
       if(num_verticies < 20){
         vertex point;
         point = createPoint(x, y);
@@ -290,6 +305,9 @@ void mouseClick(int button, int state, int x, int y){
         front_face[num_verticies] = point;
         num_verticies++;
         glutPostRedisplay(); // redisplay
+      }else{
+        printf("Vertext limit reached!\n");
+        glutPostRedisplay();
       }
     } else {
       /* Get starting x and starting y for distance change calculation
