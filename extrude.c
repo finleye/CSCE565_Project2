@@ -28,45 +28,14 @@ vertex front_face[20];
 int num_verticies = 0;
 bool extruded = false;
 
-float extrusion_offset = 2;
+float front_face_z = -2.0;
 
-// int start_x1, start_y1, start_x2, start_y2; // variables for start x and y for teapots 1 and 2 respectivly
-// double theta_x, theta_y, mouse_delta_x, mouse_delta_y; // rotation variables for teapot 1
+int start_x, start_y; // variables for start x and y for teapots 1 and 2 respectivly
+double theta_x, theta_y, mouse_delta_x, mouse_delta_y; // rotation variables for teapot 1
+GLfloat matrix[16]; // matrix state for rotation
+
 double HEIGHT = 500; // window size
 double WIDTH = 500; // window size
-
-// GLfloat matrix[16]; // matrix for remembering transformations
-
-// void teapot1(){
-//   /* Attributes for Teapot 1 
-//    * Size=1.0, Location: (-2.0, 0.0, -2.5)
-//    * Material 
-//    *  ambience (0.0215, 0.1745, 0.0215, 1.0), 
-//    *  diffusive (0.07568, 0.61424, 0.07568, 1.0), 
-//    *  specular (0.633, 0.727811, 0.633, 1.0), 
-//    *  shininess=0.6
-//    */
-//   GLfloat amb[]={0.0215, 0.1745, 0.0215, 1.0};
-//   GLfloat diff[]={0.07568, 0.61424, 0.07568, 1.0};
-//   GLfloat spec[]={0.633, 0.727811, 0.633, 1.0};
-//   GLfloat shine[]={0.6};
-
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   amb);
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   diff);
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  spec);
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shine);
-
-//   glLoadMatrixf(matrix1); // load matrix
-//   glRotatef(theta_x1, 0, 1, 0); // rotate vertically
-//   glRotatef(theta_y1, 1, 0, 0); // rotate horizontally
-//   glGetFloatv(GL_MODELVIEW_MATRIX, matrix1); // save matrix
-
-//   // to prevent further rotation on redisplay
-//   theta_x1 = 0;
-//   theta_y1 = 0;
-
-//   glutSolidTeapot(1.0); // print teapot
-// }
 
 void setLighting(){
   glLoadIdentity();
@@ -105,10 +74,10 @@ void init()
   glMatrixMode(GL_MODELVIEW);
   glEnable(GL_DEPTH_TEST); // enable hidden surface removal
 
-  // glLoadMatrixf(matrix);
-  // glLoadIdentity();
-  // glTranslatef(0.0,0.0,-2.0);
-  // glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
+  glLoadMatrixf(matrix);
+  glLoadIdentity();
+  glTranslatef(0.0f, 0.0f , -3.0f); // translate it
+  glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
 
   setLighting(); // call method to set the lighting effects
   num_verticies = 0;
@@ -132,66 +101,116 @@ vertex createPoint(int x, int y){
   gluUnProject( window_x, window_y, window_z, model_view, projection, viewport, &position_x, &position_y, &position_z);
   point.x = position_x;
   point.y = position_y;
-  point.z = -4.0;
+  point.z = front_face_z;
   return point;
 }
 
+void setMaterial(){
+  /* Material Attributes */
+  GLfloat amb[]={0.0215, 0.1745, 0.0215, 1.0};
+  GLfloat diff[]={0.07568, 0.61424, 0.07568, 1.0};
+  GLfloat spec[]={0.633, 0.727811, 0.633, 1.0};
+  GLfloat shine[]={0.3};
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   amb);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   diff);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  spec);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shine);
+}
+
+vertex findCenter(vertex* input_shape){
+  vertex point;
+
+  int i;
+  vertex temp;
+  for(i=0; i< num_verticies; i++){
+    temp = input_shape[i];
+    point.x += temp.x;
+    point.y += temp.y;
+  }
+
+  point.x = point.x/num_verticies;
+  point.y = point.y/num_verticies;
+
+  return point;
+}
+
+void setCenter(vertex* input_shape){
+  vertex center = findCenter(input_shape);
+
+  int i;
+  vertex temp;
+  for(i=0; i< num_verticies; i++){
+    input_shape[i].x = input_shape[i].x-center.x;
+    input_shape[i].y = input_shape[i].y-center.y;
+  }
+}
+
 void createPolygon(vertex* input_shape){
+  setMaterial();
+
   glColor3f(1.0f, 0.0f, 0.0f);
   glBegin(GL_POLYGON);
   int i;
   vertex temp;
     for(i=0; i< num_verticies; i++){
       temp = input_shape[i];
-      printf("CT: input_shape[%i] => [%f, %f, %f]\n", i, (float)temp.x, (float)temp.y, (float)temp.z);
       glVertex3f((float)temp.x, (float)temp.y, (float)temp.z);
     }
   glEnd();
 }
 
 void createObject(vertex* input_shape){
-  printf("CT Enter\n");
+  setMaterial();
+
+  /* Rotation */
+  glLoadMatrixf(matrix); // load matrix
+  glRotatef(theta_x, 0, 1, 0); // rotate vertically
+  glRotatef(theta_y, 1, 0, 0); // rotate horizontally
+  glGetFloatv(GL_MODELVIEW_MATRIX, matrix); // save matrix
 
   glColor3f(1.0f, 0.0f, 0.0f);
+  /* to prevent further rotation on redisplay */
+  theta_x = 0;
+  theta_y = 0;
 
+
+  /* Draw Front Face*/
   glBegin(GL_POLYGON);
   int i;
   vertex temp;
     for(i=0; i<num_verticies; i++){
       temp = input_shape[i];
-      glVertex3f((float)temp.x, (float)temp.y, (float)temp.z);
+      glVertex3f((float)temp.x, (float)temp.y, 1.0);
     }
   glEnd();
 
+
+  /* Draw side walls */
+  int j;
   for(i=0; i<num_verticies; i++){
     if(i == num_verticies-1){
-      glBegin(GL_POLYGON);
-        glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, (float)input_shape[i].z);
-        glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, (float)input_shape[i].z+extrusion_offset);
-        glVertex3f((float)input_shape[0].x, (float)input_shape[0].y, (float)input_shape[0].z);
-        glVertex3f((float)input_shape[0].x, (float)input_shape[0].y, (float)input_shape[0].z+extrusion_offset);
-      glEnd();
-    } else{
-      glBegin(GL_POLYGON);
-        glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, (float)input_shape[i].z);
-        glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, (float)input_shape[i].z+extrusion_offset);
-        glVertex3f((float)input_shape[i+1].x, (float)input_shape[i+1].y, (float)input_shape[i+1].z);
-        glVertex3f((float)input_shape[i+1].x, (float)input_shape[i+1].y, (float)input_shape[i+1].z+extrusion_offset);
-      glEnd();
+      j = 0;
+    } else {
+      j = i+1;
     }
+    glBegin(GL_POLYGON); 
+    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, 1.0);
+    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, 1.0);
+    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, -1.0);
+    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, -1.0);
+    glEnd();
   }
 
+  glColor3f(0.0f, 0.0f, 1.0f);
+  /* Draw back face */
   glBegin(GL_POLYGON);
     for(i=0; i< num_verticies; i++){
       temp = input_shape[i];
-      glVertex3f((float)temp.x, (float)temp.y, (float)temp.z+extrusion_offset);
+      glVertex3f((float)temp.x, (float)temp.y, -1.0);
     }
   glEnd();
-
-  printf("CT Exit\n");
 }
-
-/* Callbacks */
 
 /* display frame */
 void display(){
@@ -226,37 +245,49 @@ void mouseClick(int button, int state, int x, int y){
   /* Get starting x and starting y for distance change calculation
    * Set the click state for mouseMotion
    */
-  if(GLUT_LEFT_BUTTON == button){
+  if(GLUT_LEFT_BUTTON == button && state == GLUT_DOWN){
     if(extruded == false){
-      if(num_verticies < 20 && state == GLUT_DOWN){
+      if(num_verticies < 20){
         vertex point;
         point = createPoint(x, y);
-        printf("front_face[%i] => x %f, y %f, z %f\n", num_verticies, point.x, point.y, point.z);
 
         front_face[num_verticies] = point;
         num_verticies++;
-        display();
-
-        state = GLUT_UP;
+        glutPostRedisplay(); // redisplay
       }
+    } else {
+      /* Get starting x and starting y for distance change calculation
+       * Set the click state for mouseMotion
+       */
+      start_x = x;
+      start_y = y;
+      l_click = state;
     }
   }
-  if(GLUT_RIGHT_BUTTON == button){
-    printf("Right Click\n");
+  if(GLUT_RIGHT_BUTTON == button && state == GLUT_DOWN){
     if(extruded == false){
-      printf("Extrude!\n");
+      theta_x = 0.0;
+      theta_y = 0.0;
       extruded = true;
-      display();
+      
+      setCenter(front_face);
+      glutPostRedisplay(); // redisplay
     }
   }
+  state = GLUT_UP;
 }
+
 
 /* interprate mouse motion */
 void mouseMotion(int x, int y){
   /* For both right and left click, first measure change in x, and
    */
   if(l_click == GLUT_DOWN){
-
+    mouse_delta_x = (x-start_x)/2.f; // Change in x
+    mouse_delta_y = (y-start_y)/2.f; // Change in y
+    theta_x = (360*mouse_delta_x/sqrt(HEIGHT*HEIGHT+WIDTH*WIDTH)); // amount of rotation for x axis
+    theta_y = (360*mouse_delta_y/sqrt(HEIGHT*HEIGHT+WIDTH*WIDTH)); // amount of rotation for y axis
+    glutPostRedisplay(); // redisplay
   }
   if(r_click == GLUT_DOWN){
 
