@@ -149,7 +149,6 @@ void setCenter(vertex* input_shape){
 void createPolygon(vertex* input_shape){
   setMaterial();
 
-  glColor3f(1.0f, 0.0f, 0.0f);
   glBegin(GL_POLYGON);
   int i;
   vertex temp;
@@ -169,7 +168,6 @@ void createObject(vertex* input_shape){
   glRotatef(theta_y, 1, 0, 0); // rotate horizontally
   glGetFloatv(GL_MODELVIEW_MATRIX, matrix); // save matrix
 
-  glColor3f(1.0f, 0.0f, 0.0f);
   /* to prevent further rotation on redisplay */
   theta_x = 0;
   theta_y = 0;
@@ -236,7 +234,9 @@ void keyboard(unsigned char key, int x, int y){
 
   }
   if('r' == key || 'R' == key){
-
+    extruded = false;
+    num_verticies = 0;
+    glutPostRedisplay(); // redisplay
   }
 }
 
