@@ -76,7 +76,6 @@ void init()
 
   glLoadMatrixf(matrix);
   glLoadIdentity();
-  glTranslatef(0.0f, 0.0f , -3.0f); // translate it
   glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
 
   setLighting(); // call method to set the lighting effects
@@ -137,12 +136,15 @@ vertex findCenter(vertex* input_shape){
 
 void setCenter(vertex* input_shape){
   vertex center = findCenter(input_shape);
+    printf("Center:        %10f,\t %10f\n", (float)center.x, (float)center.y);
 
   int i;
   vertex temp;
   for(i=0; i< num_verticies; i++){
+    printf("Before Center: %10f,\t %10f\n", input_shape[i].x, input_shape[i].y);
     input_shape[i].x = input_shape[i].x-center.x;
     input_shape[i].y = input_shape[i].y-center.y;
+    printf("After Center:  %10f,\t %10f\n", input_shape[i].x, input_shape[i].y);
   }
 }
 
@@ -250,6 +252,7 @@ void mouseClick(int button, int state, int x, int y){
       if(num_verticies < 20){
         vertex point;
         point = createPoint(x, y);
+        printf("front_face[%i]: (%f, %f)\n", num_verticies, (float)point.x, (float)point.y);
 
         front_face[num_verticies] = point;
         num_verticies++;
