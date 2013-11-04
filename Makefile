@@ -11,10 +11,10 @@ EXECUTABLE = Extrude
 #Specifies the compilier we will be using
 
 #Linux
-#CC = g++
+CC = g++
 
 #Mac
-CC = gcc
+# CC = gcc
 
 
 #Specifies the compiler flags to be used
@@ -24,11 +24,11 @@ CFLAGS = -g3 -Wall -Wno-non-template-friend -fpermissive
 
 #Specifies the locations and libraries needed to compile the executable
 # Linux
-# LIBRARIES = -L "/usr/X11/lib" 
-# LIBRARIES += -lglut -lGL -lGLU -lm
+LIBRARIES = -L "/usr/X11/lib" 
+LIBRARIES += -lglut -lGL -lGLU -lm
 
 # Mac
-LIBRARIES += -framework OpenGL -framework GLUT
+# LIBRARIES += -framework OpenGL -framework GLUT
 
 all:
 	$(CC) $(CFLAGS) $(LIBRARIES) $(COMPILING) -o $(EXECUTABLE)

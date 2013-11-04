@@ -8,12 +8,12 @@
 #include <stdbool.h> 
 
 // Mac Header Files
-#include <GLUT/glut.h>
-#include <OpenGL/gl.h>
+// #include <GLUT/glut.h>
+// #include <OpenGL/gl.h>
 
 // Linux Header Files
-// #include <GL/glut.h> 
-// #include <GL/gl.h>
+#include <GL/glut.h> 
+#include <GL/gl.h>
 
 int  l_click = GLUT_UP; // initial value for left click
 int  r_click = GLUT_UP; // initial value for right click
@@ -76,6 +76,7 @@ void init()
 
   glLoadMatrixf(matrix);
   glLoadIdentity();
+  glTranslatef(0.0,0.0,-3.0);
   glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
 
   setLighting(); // call method to set the lighting effects
@@ -96,11 +97,15 @@ vertex createPoint(int x, int y){
 
   window_x = (float)x;
   window_y = (float)viewport[3] - (float)y;
+
+  // calculate x and y position in the window
   glReadPixels( x, (int)window_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &window_z );
   gluUnProject( window_x, window_y, window_z, model_view, projection, viewport, &position_x, &position_y, &position_z);
+
   point.x = position_x;
   point.y = position_y;
   point.z = front_face_z;
+
   return point;
 }
 
@@ -136,28 +141,30 @@ vertex findCenter(vertex* input_shape){
 
 void setCenter(vertex* input_shape){
   vertex center = findCenter(input_shape);
-    printf("Center:        %10f,\t %10f\n", (float)center.x, (float)center.y);
+    printf("%15s\t%10s\t%10s\n", "Info", "X-Value", "Y-Value");
+    printf("%15s\t%10s\t%10s\n", "-------------", "----------", "----------");
+    printf("%15s\t%10f\t%10f\n", "Found Center", (float)center.x, (float)center.y);
 
   int i;
-  vertex temp;
   for(i=0; i< num_verticies; i++){
-    printf("Before Center: %10f,\t %10f\n", input_shape[i].x, input_shape[i].y);
+    printf("%15s\t%10f\t%10f\n", "Pre-Center", input_shape[i].x, input_shape[i].y);
     input_shape[i].x = input_shape[i].x-center.x;
     input_shape[i].y = input_shape[i].y-center.y;
-    printf("After Center:  %10f,\t %10f\n", input_shape[i].x, input_shape[i].y);
+    printf("%15s\t%10f\t%10f\n", "Post-Center", input_shape[i].x, input_shape[i].y);
   }
 }
 
-void createPolygon(vertex* input_shape){
+void createPolygon(vertex* input_shape, float z_value){
   setMaterial();
 
-  glBegin(GL_POLYGON);
   int i;
   vertex temp;
-    for(i=0; i< num_verticies; i++){
-      temp = input_shape[i];
-      glVertex3f((float)temp.x, (float)temp.y, (float)temp.z);
-    }
+
+  glBegin(GL_POLYGON);
+  for(i=0; i< num_verticies; i++){
+    temp = input_shape[i];
+    glVertex3f((float)temp.x, (float)temp.y, z_value);
+  }
   glEnd();
 }
 
@@ -174,20 +181,11 @@ void createObject(vertex* input_shape){
   theta_x = 0;
   theta_y = 0;
 
-
   /* Draw Front Face*/
-  glBegin(GL_POLYGON);
-  int i;
-  vertex temp;
-    for(i=0; i<num_verticies; i++){
-      temp = input_shape[i];
-      glVertex3f((float)temp.x, (float)temp.y, 1.0);
-    }
-  glEnd();
-
+  createPolygon(front_face, 0.5);
 
   /* Draw side walls */
-  int j;
+  int i, j;
   for(i=0; i<num_verticies; i++){
     if(i == num_verticies-1){
       j = 0;
@@ -195,21 +193,15 @@ void createObject(vertex* input_shape){
       j = i+1;
     }
     glBegin(GL_POLYGON); 
-    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, 1.0);
-    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, 1.0);
-    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, -1.0);
-    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, -1.0);
+    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, 0.5);
+    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, 0.5);
+    glVertex3f((float)input_shape[j].x, (float)input_shape[j].y, -0.5);
+    glVertex3f((float)input_shape[i].x, (float)input_shape[i].y, -0.5);
     glEnd();
   }
 
-  glColor3f(0.0f, 0.0f, 1.0f);
-  /* Draw back face */
-  glBegin(GL_POLYGON);
-    for(i=0; i< num_verticies; i++){
-      temp = input_shape[i];
-      glVertex3f((float)temp.x, (float)temp.y, -1.0);
-    }
-  glEnd();
+  /* draw back face */
+  createPolygon(front_face, -0.5);
 }
 
 /* display frame */
@@ -217,7 +209,7 @@ void display(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // clear the color buffer and the depth buffer
   if(num_verticies >= 3){
     if(extruded == false){
-      createPolygon(front_face);
+      createPolygon(front_face, -2.0);
     } else {
       createObject(front_face);
     }
@@ -236,6 +228,7 @@ void keyboard(unsigned char key, int x, int y){
 
   }
   if('r' == key || 'R' == key){
+    printf("Reset!\n");
     extruded = false;
     num_verticies = 0;
     glutPostRedisplay(); // redisplay
@@ -252,7 +245,7 @@ void mouseClick(int button, int state, int x, int y){
       if(num_verticies < 20){
         vertex point;
         point = createPoint(x, y);
-        printf("front_face[%i]: (%f, %f)\n", num_verticies, (float)point.x, (float)point.y);
+        printf("front_face[%i]: %10f\t%10f\n", num_verticies, (float)point.x, (float)point.y);
 
         front_face[num_verticies] = point;
         num_verticies++;
@@ -291,9 +284,6 @@ void mouseMotion(int x, int y){
     theta_x = (360*mouse_delta_x/sqrt(HEIGHT*HEIGHT+WIDTH*WIDTH)); // amount of rotation for x axis
     theta_y = (360*mouse_delta_y/sqrt(HEIGHT*HEIGHT+WIDTH*WIDTH)); // amount of rotation for y axis
     glutPostRedisplay(); // redisplay
-  }
-  if(r_click == GLUT_DOWN){
-
   }
 }
 
